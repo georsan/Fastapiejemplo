@@ -3,8 +3,8 @@ from urllib.request import Request
 from fastapi import FastAPI, HTTPException,Request,status
 from datetime import datetime
 from fastapi import FastAPI
-from service.deviceServicio import crearDevice
-from utils.settings import db
+from app.service.deviceServicio import crearDevice
+from app.utils.settings import db
 import json,os  
 app = FastAPI()
 
