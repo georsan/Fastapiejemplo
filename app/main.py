@@ -60,16 +60,18 @@ async def initUpdate(id:str):
     bucket=dispositivo['bucket']
     env=dispositivo['env']
     fecha=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    if  estado== "Actualización Pendiente":
+    if  estado!="success":
         
         ruta="/root/Update_devices/runApp.sh"
         os.system("sh {} {} {} {} {} {}".format(ruta,id,bucket,firmware,env,fecha))
         #os.system("node /home/georsan/trabajo/Update_devices/Typescriptjs/Hellomundo.js")
     else:
         json={
-            "_id":datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            "firmware":dispositivo['firmware'],
-            "estado":"sin actualizaciones"}
+            "_id":fecha,
+            "firmware":firmware,
+            "estado":estado,
+            "bucket":bucket,
+            "env":env}
 
         crearDevice(json,id)
         raise HTTPException(status_code=200, detail="sin actualizaciones")
