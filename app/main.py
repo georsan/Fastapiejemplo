@@ -59,10 +59,11 @@ async def initUpdate(id:str):
     firmware=dispositivo['firmware']
     bucket=dispositivo['bucket']
     env=dispositivo['env']
+    fecha=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if  estado== "Actualización Pendiente":
         
-        ruta="/home/georsan/nuevo/Update_devices/runApp.sh"
-        os.system("sh {} UP_001 firmware-file-test firmware.bin esp32dev 22-05-29".format(ruta))
+        ruta="/root/Update_devices/runApp.sh"
+        os.system("sh {} {} {} {} {} {}".format(ruta,id,bucket,firmware,env,fecha))
         #os.system("node /home/georsan/trabajo/Update_devices/Typescriptjs/Hellomundo.js")
     else:
         json={
