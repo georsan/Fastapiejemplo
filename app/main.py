@@ -27,7 +27,7 @@ async def saveDevice(device:Request):
            crearDevice(json,i['id'])
        raise HTTPException(status_code=200, detail="Registro con éxito")
 
-
+    
 @app.get("/device/{id}")
 def readDevice(id:str):
     sum=0
@@ -40,18 +40,47 @@ def readDevice(id:str):
         return item.pop()
 
 
+'''
 @app.put("/device/{id}")
 async def saveDevice(id,estado:Request):
    #estado=estado.json()
    #device=readDevice(id)
    print("hola")
-   '''json={
+   json={
         "_id":datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         "firmware":device['firmware'],
         "estado":estado['estado']}
    crearDevice(json,id)
-   return json'''   
+   return json   
    raise HTTPException(status_code=200, detail="sin actualizaciones")
+'''
+'''@app.post("/initUpdate")
+async def initUpdate():
+    for i in db.list_collections():
+        id=i['name']
+        dispositivo=readDevice(id)
+        estado=dispositivo['estado']
+        firmware=dispositivo['firmware']
+        bucket=dispositivo['bucket']
+        env=dispositivo['env']
+        fecha=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if  estado!="success":
+            
+            ruta="/home/georsan/nuevo/Update_devices/runApp.sh"
+            os.system("sh {} {} {} {} {} {}".format(ruta,id,bucket,firmware,env,fecha))
+            #os.system("node /home/georsan/trabajo/Update_devices/Typescriptjs/Hellomundo.js")
+        else:
+            json={
+                "_id":fecha,
+                "firmware":firmware,
+                "estado":estado,
+                "bucket":bucket,
+                "env":env}
+
+            crearDevice(json,id)
+
+    raise HTTPException(status_code=200, detail="ok")'''
+    
 @app.post("/initUpdate/{id}")
 async def initUpdate(id:str):
     dispositivo=readDevice(id)
@@ -75,4 +104,3 @@ async def initUpdate(id:str):
 
         crearDevice(json,id)
         raise HTTPException(status_code=200, detail="sin actualizaciones")
-    
