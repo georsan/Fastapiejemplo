@@ -1,3 +1,4 @@
+from multiprocessing.connection import wait
 from urllib import request
 from urllib.request import Request
 from fastapi import FastAPI, HTTPException,Request,status
@@ -5,7 +6,10 @@ from datetime import datetime
 from fastapi import FastAPI
 from app.service.deviceServicio import crearDevice
 from app.utils.settings import db
-import json,os  
+import time
+import json,os
+import requests
+
 app = FastAPI()
 
 
@@ -17,14 +21,31 @@ async def saveDevice(device:Request):
        raise HTTPException(status_code=422, detail="Unprocessable Entity")
    else:
        for i in request:
-           json={
-               "_id":datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+
+            _json={
+                "_id":time.time_ns(),
                 "firmware":i['firmware'],
                 "estado":i['estado'],
                 "bucket":i['bucket'],
                 "env":i['env']
                 }
-           crearDevice(json,i['id'])
+            crearDevice(_json,i['id'])
+            id_device = i['id']
+            header_ = {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJPVEEiLCJzdnIiOiJtYWtlc2Vucy5hd3MudGhpbmdlci5pbyIsInVzciI6Ik1ha2VTZW5zIn0.xbbjNXgCLX00LZZ7SM-eKYq9cN2xfesTWH__BOD7rZk"
+                }
+            _property_=json.dumps({
+            "value": {
+                "val": True
+            }
+            })
+
+            response = requests.put(    url=f"https://makesens.aws.thinger.io/v3/users/MakeSens/devices/{id_device}/properties/is_update",
+                                    data=_property_, headers=header_   ) 
+
+
+
        raise HTTPException(status_code=200, detail="Registro con éxito")
 
     
@@ -81,18 +102,20 @@ async def initUpdate():
 
     raise HTTPException(status_code=200, detail="ok")'''
     
-@app.post("/initUpdate/{id}")
-async def initUpdate(id:str):
+@app.post("/initUpdate")
+async def initUpdate(id:Request):
+    body=await id.json()
+    id=body['id']
     dispositivo=readDevice(id)
     estado=dispositivo['estado']
     firmware=dispositivo['firmware']
     bucket=dispositivo['bucket']
     env=dispositivo['env']
-    fecha=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    fecha=time.time_ns()
     if  estado!="success":
         
-        ruta="/root/Update_devices/runApp.sh"
-        os.system("sh {} {} {} {} {} {}".format(ruta,id,bucket,firmware,env,fecha))
+        ruta="/home/georsan/nuevo/Update_devices/runApp.sh"
+        os.system("sh {} {} {} {} {} {} > /home/georsan/log/{}{}.log &".format(ruta,id,bucket,firmware,env,fecha,id,fecha))
         #os.system("node /home/georsan/trabajo/Update_devices/Typescriptjs/Hellomundo.js")
     else:
         json={
@@ -103,4 +126,6 @@ async def initUpdate(id:str):
             "env":env}
 
         crearDevice(json,id)
+        
         raise HTTPException(status_code=200, detail="sin actualizaciones")
+        
