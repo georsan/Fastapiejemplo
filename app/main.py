@@ -112,10 +112,17 @@ async def initUpdate(id:Request):
     bucket=dispositivo['bucket']
     env=dispositivo['env']
     fecha=time.time_ns()
+    
     if  estado!="success":
-        
+        json={
+            "_id":fecha,
+            "firmware":firmware,
+            "estado":"Actualizando",
+            "bucket":bucket,
+            "env":env}
+        crearDevice(json,id)
         ruta="/home/georsan/nuevo/Update_devices/runApp.sh"
-        os.system("sh {} {} {} {} {} {} > /home/georsan/log/{}{}.log &".format(ruta,id,bucket,firmware,env,fecha,id,fecha))
+        os.system("sh {} {} {} {} {} {} ".format(ruta,id,bucket,firmware,env,fecha,id,fecha))
         #os.system("node /home/georsan/trabajo/Update_devices/Typescriptjs/Hellomundo.js")
     else:
         json={
